@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"log"
 
@@ -22,7 +24,7 @@ func main() {
 	checkOutDate := "2023-01-18"
 
 	// Начало транзакции
-	tx, err := db.Beginx()
+	tx, err := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,7 +32,7 @@ func main() {
 
 	// Проверка доступности номеров перед бронированием
 	var isAvailable bool
-	err = tx.Get(&isAvailable, "SELECT is_available FROM rooms WHERE room_id = $1", roomID)
+	err = tx.QueryRow("SELECT is_available FROM rooms WHERE room_id = $1", roomID).Scan(&isAvailable)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +45,7 @@ func main() {
 
 	// Проверка, что даты бронирования не пересекаются с существующими бронированиями
 	var count int
-	err = tx.Get(&count, "SELECT COUNT(*) FROM reservations WHERE room_id = $1 AND check_out_date >= $2 AND check_in_date <= $3", roomID, checkInDate, checkOutDate)
+	err = tx.QueryRow("SELECT COUNT(*) FROM reservations WHERE room_id = $1 AND check_out_date >= $2 AND check_in_date <= $3", roomID, checkInDate, checkOutDate).Scan(&count)
 	if err != nil {
 		log.Fatal(err)
 	}
