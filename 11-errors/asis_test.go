@@ -18,6 +18,9 @@ func TestIs(t *testing.T) {
 
 	// ---
 
+	equalsWorks := err == ErrInvalidValue
+	assert.False(t, equalsWorks)
+
 	isWorks := errors.Is(err, ErrInvalidValue)
 	assert.True(t, isWorks)
 }
