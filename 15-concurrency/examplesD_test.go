@@ -25,18 +25,7 @@ func TestBufferedSimple(t *testing.T) {
 }
 
 func TestBuffered(t *testing.T) {
-	tasksChan := make(chan string) // !
-
-	worker := func(workerId int) {
-		fmt.Printf("worker %d: started\n", workerId)
-
-		for task := range tasksChan {
-			time.Sleep(100 * time.Millisecond) // processing
-			fmt.Printf("worker %d: task %s processed\n", workerId, task)
-		}
-
-		fmt.Printf("worker %d: finished\n", workerId)
-	}
+	tasksChan := make(chan string, 6) // !
 
 	fmt.Println("main: sending tasks")
 	tasks := []string{"dog", "cat", "bird", "fish", "snake", "turtle"}
@@ -48,14 +37,23 @@ func TestBuffered(t *testing.T) {
 	fmt.Println("main: all tasks sent")
 
 	fmt.Println("main: starting workers") // try move this after tasks sending
-	go worker(1)
-	go worker(2)
+	go worker(1, tasksChan)
+	go worker(2, tasksChan)
 
 	// other highlights:
 	// one channel can be used by multiple goroutines
 	// useful pattern: one goroutine sends tasks, other goroutines process them
 	time.Sleep(10 * time.Second)
 
-	// timer := time.NewTimer(1 * time.Second)
-	// timer.
+}
+
+func worker(workerId int, tasksChan chan string) {
+	fmt.Printf("worker %d: started\n", workerId)
+
+	for task := range tasksChan {
+		time.Sleep(100 * time.Millisecond) // processing
+		fmt.Printf("worker %d: task %s processed\n", workerId, task)
+	}
+
+	fmt.Printf("worker %d: finished\n", workerId)
 }

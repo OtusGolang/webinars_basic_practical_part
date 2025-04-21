@@ -1,30 +1,33 @@
 package parallel
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
 	"testing"
 	"time"
 )
 
 func TestTimeout(t *testing.T) {
+	// Test caching can ruin the demonstration. Set use "-count=1" argument to avoid caching.
+
+	log.SetFlags(log.Lmicroseconds)
 
 	done := doSmth()
 
 	timeout := time.After(2 * time.Second)
-	fmt.Println("main: started")
+	log.Println("main: started")
 
 	select {
 	case <-done:
-		fmt.Println("main: done")
+		log.Print("main: done")
 	case <-timeout:
-		fmt.Println("main: timeout")
+		log.Print("main: timeout")
 	}
 
 	// Possible temporary mem leak.
 	// https://arangodb.com/2020/09/a-story-of-a-memory-leak-in-go-how-to-properly-use-time-after/
 
-	fmt.Println("main: stopped")
+	log.Print("main: stopped")
 
 }
 
@@ -33,15 +36,17 @@ func doSmth() chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		ms := rand.Intn(3000)
+		log.Printf("doSmth: it will take %d ms", ms)
 		time.Sleep(time.Duration(ms) * time.Millisecond)
-		fmt.Println("doSmth: done after", ms)
+		log.Print("doSmth: done")
 		close(done)
 	}()
 	return done
 }
 
+// TestFeeder demonstrates example of rejecting data if overflow
 func TestFeeder(t *testing.T) {
-	consumer := func(input chan int) {
+	consumer1PerSec := func(input chan int) {
 		for range input {
 			ms := rand.Intn(1000)
 			time.Sleep(time.Duration(ms) * time.Millisecond)
@@ -49,14 +54,14 @@ func TestFeeder(t *testing.T) {
 	}
 
 	ch := make(chan int)
-	go consumer(ch)
+	go consumer1PerSec(ch)
 
 	for i := 0; i < 100; i++ {
 		select {
 		case ch <- i:
-			fmt.Println("main: sent")
+			log.Println("main: sent")
 		default:
-			fmt.Println("main: overflow")
+			log.Println("main: overflow")
 			// TODO: secondary consumer?
 		}
 		ms := rand.Intn(1000)
