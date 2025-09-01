@@ -1,6 +1,6 @@
 package bl
 
-import "webinars_basic_practical_part/12-interfaces/02-practical/models"
+import "webinars_basic_practical_part/12-interfaces/03-practical/models"
 
 type ItemSaver interface {
 	SaveItem(item models.ItemDbModel)

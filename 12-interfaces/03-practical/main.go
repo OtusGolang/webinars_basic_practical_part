@@ -1,8 +1,8 @@
 package main
 
 import (
-	"webinars_basic_practical_part/12-interfaces/02-practical/bl"
-	"webinars_basic_practical_part/12-interfaces/02-practical/repo"
+	"webinars_basic_practical_part/12-interfaces/03-practical/bl"
+	"webinars_basic_practical_part/12-interfaces/03-practical/repo"
 )
 
 func main() {

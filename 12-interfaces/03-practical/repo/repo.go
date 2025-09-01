@@ -2,7 +2,7 @@ package repo
 
 import (
 	"fmt"
-	"webinars_basic_practical_part/12-interfaces/02-practical/models"
+	"webinars_basic_practical_part/12-interfaces/03-practical/models"
 )
 
 type RealDbRepo struct{}
